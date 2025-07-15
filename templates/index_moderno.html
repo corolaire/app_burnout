@@ -1,0 +1,138 @@
+<!-- solo pegá esto reemplazando todo tu archivo index_moderno.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Detector de Burnout</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ff4da6;
+      margin: 0;
+      padding: 20px;
+      color: #111;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .contenedor {
+      max-width: 700px;
+      margin: auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .pregunta {
+      margin-bottom: 25px;
+      padding: 15px;
+      background-color: #ffe0f0;
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #111;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+
+    input[type="email"] {
+      padding: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .resultado {
+      margin-top: 30px;
+      font-size: 1.1em;
+      background-color: #eafaf1;
+      border-left: 6px solid #2ecc71;
+      padding: 20px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>🧠 Detector de Burnout</h1>
+    <form id="formulario">
+      <label for="email"><b>Tu correo (opcional):</b></label>
+      <input type="email" id="email" name="email" placeholder="nombre@correo.com">
+      <div id="preguntas"></div>
+      <button type="submit">Enviar</button>
+    </form>
+    <div id="resultado" class="resultado"></div>
+  </div>
+
+  <script>
+    async function cargarPreguntas() {
+      const resp = await fetch('/questions');
+      const preguntas = await resp.json();
+      const contenedor = document.getElementById('preguntas');
+      preguntas.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'pregunta';
+        div.innerHTML = `<p><b>${p.texto}</b></p>`;
+        p.opciones.forEach((op, idx) => {
+          div.innerHTML += `
+            <label>
+              <input type="radio" name="pregunta_${p.id}" value="${idx+1}" required> ${op}
+            </label>`;
+        });
+        contenedor.appendChild(div);
+      });
+    }
+
+    document.getElementById('formulario').addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const respuestas = {};
+      for (const [key, value] of formData.entries()) {
+        if (key.startsWith('pregunta_')) {
+          const id = key.split('_')[1];
+          respuestas[id] = value;
+        }
+      }
+      const email = formData.get('email');
+      const resp = await fetch('/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ respuestas, email })
+      });
+      const resultado = await resp.json();
+      const divResultado = document.getElementById('resultado');
+      divResultado.innerHTML = `
+        ✅ <b>Tu cuestionario fue enviado con éxito.</b><br><br>
+        <strong>Nivel:</strong> ${resultado.nivel}<br>
+        <strong>Consejo:</strong> ${resultado.consejo}<br><br>
+        🌟 Gracias por darte este espacio. Cuidarte también es productividad.
+      `;
+    });
+
+    cargarPreguntas();
+  </script>
+</body>
+</html>
+
+
