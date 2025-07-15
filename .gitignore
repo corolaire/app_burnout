@@ -2,6 +2,10 @@
 __pycache__/
 *.py[codz]
 *$py.class
+burnout_env/
+__pycache__/
+*.pyc
+.env
 
 # C extensions
 *.so
