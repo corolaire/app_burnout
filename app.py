@@ -1,5 +1,7 @@
 import smtplib
 from flask import Flask, jsonify, request, render_template
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -20,11 +22,25 @@ def evaluar_burnout(puntaje_total):
     else:
         return "🔴 Riesgo alto", "Alerta. Necesitás frenar y reconectar con vos."
 
-def enviar_mail_simulado(destinatario, cuerpo):
-    print(f"📧 Simulando envío de correo a {destinatario}")
-    print("------")
-    print(cuerpo)
-    print("------")
+def enviar_mail_real(destinatario, cuerpo):
+    remitente = "corolairem@gmail.com"
+    clave_app = "yhcg vmpz scsm regz"  
+
+    msg = MIMEMultipart()
+    msg['From'] = remitente
+    msg['To'] = destinatario
+    msg['Subject'] = "Resultado de tu Test de Burnout"
+    msg.attach(MIMEText(cuerpo, 'plain'))
+
+    try:
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor.starttls()
+        servidor.login(remitente, clave_app)
+        servidor.send_message(msg)
+        servidor.quit()
+        print(f"✅ Mail enviado a {destinatario}")
+    except Exception as e:
+        print(f"❌ Error al enviar mail: {e}")
 
 @app.route('/')
 def index():
@@ -53,12 +69,12 @@ def evaluate():
     nivel, consejo = evaluar_burnout(puntaje)
     cuerpo += f"\nResultado: {nivel}\nConsejo: {consejo}"
 
-    # Simular envío (acá podrías usar smtplib real)
     if email:
-        enviar_mail_simulado("test@correo.com", cuerpo)
+        enviar_mail_real(email, cuerpo)
 
     return jsonify({"nivel": nivel, "consejo": consejo})
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
