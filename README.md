@@ -19,7 +19,9 @@ Desarrollada con **Python + Flask**, pensada para desarrolladores, freelancers o
 1. Cloná este repositorio:
 
 ```bash
-git clone https://github.com/tuusuario/burnout-detector-app.git
+git clone https://github.com/corolaire/app_burnout.git
 cd burnout-detector-app
 Instala: Python ,recordá que es importante tener el pip actualizado!
 Flask ---> pip install flask 
+Corré tu app con : python app.py
+Abrí en navegador: http://127.0.0.1:5000/ 
